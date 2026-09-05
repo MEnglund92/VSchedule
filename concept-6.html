@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veronikas Schema — Brutalist</title>
+  <style>
+    :root {
+      --slot-h: 60px;
+      --time-col-w: 100px;
+      --day-min-w: 220px;
+      --font: "SF Mono", "Cascadia Code", "Fira Code", "Consolas", monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      font-weight: 700;
+      background: #ffffff;
+      color: #000000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    body.dark {
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 64px;
+      background: #000000;
+      color: #ffffff;
+      border-bottom: 3px solid #000000;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    body.dark .header {
+      background: #ffffff;
+      color: #000000;
+      border-bottom-color: #ffffff;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 0.08em;
+    }
+
+    .header-title svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 0;
+    }
+
+    .day-tab {
+      background: none;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: all 0.1s ease;
+    }
+
+    .day-tab + .day-tab { border-left: none; }
+
+    .day-tab.active {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    body.dark .day-tab {
+      border-color: #000000;
+      color: #000000;
+    }
+
+    body.dark .day-tab.active {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .day-tab:hover:not(.active) {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body.dark .day-tab:hover:not(.active) {
+      background: rgba(0,0,0,0.2);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0;
+    }
+
+    .view-btn {
+      background: none;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+
+    .view-btn + .view-btn { border-left: none; }
+
+    .view-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .view-btn.active {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    body.dark .view-btn {
+      border-color: #000000;
+      color: #000000;
+    }
+
+    body.dark .view-btn.active {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .view-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body.dark .view-btn:hover:not(.active) {
+      background: rgba(0,0,0,0.2);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid #ffffff;
+      padding: 6px 14px;
+      transition: background 0.1s ease;
+    }
+
+    body.dark .search-box {
+      border-color: #000000;
+      color: #000000;
+    }
+
+    .search-box:focus-within {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body.dark .search-box:focus-within {
+      background: rgba(0,0,0,0.2);
+    }
+
+    .search-box svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      border: none;
+      background: none;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      outline: none;
+      width: 140px;
+      text-transform: uppercase;
+    }
+
+    .search-box input::placeholder {
+      color: inherit;
+      opacity: 0.5;
+    }
+
+    .ics-download {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+
+    body.dark .ics-download {
+      border-color: #000000;
+      color: #000000;
+    }
+
+    .ics-download svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ics-download:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body.dark .ics-download:hover {
+      background: rgba(0,0,0,0.2);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    body.dark .theme-toggle {
+      border-color: #000000;
+      color: #000000;
+    }
+
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body.dark .theme-toggle:hover {
+      background: rgba(0,0,0,0.2);
+    }
+
+    .main {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .grid-view { display: block; }
+    .cards-view { display: none; }
+
+    body.view-active .grid-view { display: block; }
+    body.view-active .cards-view { display: none; }
+
+    .timetable-wrapper {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .timetable {
+      display: grid;
+      grid-template-columns: var(--time-col-w) repeat(5, minmax(var(--day-min-w), 1fr));
+      min-width: calc(var(--time-col-w) + 5 * var(--day-min-w));
+      border: 3px solid #000000;
+      background: #ffffff;
+    }
+
+    body.dark .timetable {
+      border-color: #ffffff;
+      background: #111111;
+    }
+
+    .time-header,
+    .day-header {
+      padding: 12px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .time-header {
+      background: #ffffff;
+      color: #999999;
+      border-right: 3px solid #000000;
+      border-bottom: 3px solid #000000;
+    }
+
+    body.dark .time-header {
+      background: #111111;
+      color: #666666;
+      border-color: #ffffff;
+    }
+
+    .day-header {
+      background: #000000;
+      color: #ffffff;
+      border-right: 3px solid #000000;
+      border-bottom: 3px solid #000000;
+    }
+
+    body.dark .day-header {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+    }
+
+    .day-header:last-child {
+      border-right: 3px solid #000000;
+    }
+
+    body.dark .day-header:last-child {
+      border-right-color: #ffffff;
+    }
+
+    .time-label {
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #999999;
+      text-align: right;
+      border-right: 3px solid #000000;
+      border-bottom: 2px solid #000000;
+      background: #ffffff;
+    }
+
+    body.dark .time-label {
+      color: #666666;
+      border-color: #ffffff;
+      background: #111111;
+    }
+
+    .grid-cell {
+      min-height: var(--slot-h);
+      border-right: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+      background: #ffffff;
+      position: relative;
+    }
+
+    body.dark .grid-cell {
+      border-color: #ffffff;
+      background: #111111;
+    }
+
+    .grid-cell:last-child {
+      border-right: 3px solid #000000;
+    }
+
+    body.dark .grid-cell:last-child {
+      border-right-color: #ffffff;
+    }
+
+    .day-column {
+      position: relative;
+    }
+
+    .class-block {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      padding: 6px 8px;
+      background: #ffffff;
+      border: 2px solid #000000;
+      font-size: 11px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      z-index: 1;
+    }
+
+    body.dark .class-block {
+      background: #222222;
+      border-color: #ffffff;
+    }
+
+    .class-block:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .class-block .time {
+      font-size: 9px;
+      color: #999999;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .class-block .subject {
+      font-size: 11px;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 1px;
+    }
+
+    .class-block .teacher {
+      font-size: 9px;
+      color: #666666;
+      font-weight: 700;
+    }
+
+    .class-block:hover .time,
+    .class-block:hover .subject,
+    .class-block:hover .teacher {
+      color: #ffffff;
+    }
+
+    .class-block.compact .subject,
+    .class-block.compact .teacher {
+      font-size: 9px;
+    }
+
+    .now-indicator {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #ff0000;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .now-indicator::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -4px;
+      width: 11px;
+      height: 11px;
+      background: #ff0000;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .class-card {
+      background: #ffffff;
+      border: 3px solid #000000;
+      padding: 16px;
+      transition: all 0.1s ease;
+    }
+
+    body.dark .class-card {
+      background: #222222;
+      border-color: #ffffff;
+    }
+
+    .class-card:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .class-card.color-bar {
+      border-left: 6px solid #000000;
+    }
+
+    body.dark .class-card.color-bar {
+      border-left-color: #ffffff;
+    }
+
+    .class-card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .class-card-time {
+      font-size: 10px;
+      color: #999999;
+      font-weight: 700;
+    }
+
+    .class-card-subject {
+      font-size: 14px;
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .class-card-teacher {
+      font-size: 11px;
+      color: #666666;
+      font-weight: 700;
+    }
+
+    .class-card:hover .class-card-time,
+    .class-card:hover .class-card-subject,
+    .class-card:hover .class-card-teacher {
+      color: #ffffff;
+    }
+
+    .legend {
+      padding: 16px;
+      border: 3px solid #000000;
+      background: #ffffff;
+    }
+
+    body.dark .legend {
+      border-color: #ffffff;
+      background: #111111;
+    }
+
+    .legend-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #999999;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+
+    .legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #666666;
+      border: 2px solid #000000;
+      padding: 6px 12px;
+    }
+
+    body.dark .legend-item {
+      border-color: #ffffff;
+      color: #999999;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #000000;
+    }
+
+    body.dark .legend-color {
+      border-color: #ffffff;
+    }
+
+    .footer {
+      padding: 16px 24px;
+      font-size: 10px;
+      color: #999999;
+      border-top: 3px solid #000000;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    body.dark .footer {
+      border-top-color: #ffffff;
+      color: #666666;
+    }
+
+    .hidden { display: none !important; }
+    .dimmed { opacity: 0.25; }
+
+    @media (max-width: 768px) {
+      .header { padding: 0 12px; height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+      .header-controls { gap: 8px; }
+      .main { padding: 12px; }
+      .search-box input { width: 100px; }
+    }
+  </style>
+</head>
+<body class="view-active grid" data-theme="light">
+  <header class="header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Veronikas Schema
+    </div>
+    <div class="header-controls">
+      <div class="day-tabs">
+        <button class="day-tab active" data-day="all">Alla</button>
+        <button class="day-tab" data-day="1">Mån</button>
+        <button class="day-tab" data-day="2">Tis</button>
+        <button class="day-tab" data-day="3">Ons</button>
+        <button class="day-tab" data-day="4">Tor</button>
+        <button class="day-tab" data-day="5">Fre</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Schema
+        </button>
+        <button class="view-btn" data-view="cards">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/></svg>
+          Kort
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" type="text" placeholder="Sök lektion..." />
+      </div>
+      <a class="ics-download" href="schedule.ics" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        .ics
+      </a>
+      <button class="theme-toggle" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="grid-view">
+      <div class="timetable-wrapper">
+        <div class="timetable"></div>
+      </div>
+    </div>
+    <div class="cards-view">
+      <div class="cards-container"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Ämnen</div>
+      <div class="legend-grid"></div>
+    </div>
+  </main>
+  <footer class="footer">Veronikas schema — vecka 36 till 24</footer>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

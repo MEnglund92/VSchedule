@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Cloudflare wrangler local state
+.wrangler/
+wrangler-tunnel.lock
+
+# Secrets (never commit)
+*.secret
+.env
+.dev.vars
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp / editor
+*.tmp
+*.bak

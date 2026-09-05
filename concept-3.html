@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veronikas Schema — Concept 3: Gradient Mesh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --slot-h: 60px;
+      --time-col-w: 100px;
+      --day-min-w: 220px;
+      --day-mon: #4a90d9;
+      --day-tue: #9b59b6;
+      --day-wed: #27ae60;
+      --day-thu: #e67e22;
+      --day-fri: #e84393;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #faf0e6 0%, #f5e6ff 30%, #e6f0ff 60%, #fff5f5 100%);
+      color: #2d3436;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #4a1a6b, #2c3e8c);
+      color: #fff;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(74, 26, 107, 0.25);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .header-title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .day-tab {
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: rgba(255, 255, 255, 0.75);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .day-tab:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    .day-tab.active {
+      background: rgba(255, 255, 255, 0.35);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .view-toggle {
+      display: flex;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .view-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.65);
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .view-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .view-btn:hover { color: #fff; }
+
+    .view-btn.active {
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+    }
+
+    .search-box svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      width: 130px;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .search-box input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+    .ics-download {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.25s ease;
+    }
+
+    .ics-download svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ics-download:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .theme-toggle {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      padding: 20px 24px;
+      position: relative;
+    }
+
+    /* ── Grid View ── */
+    .grid-view {
+      display: none;
+    }
+
+    body.view-active.grid .grid-view { display: block; }
+    body.view-active.cards .grid-view { display: none; }
+
+    .timetable-wrapper {
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+
+    .timetable {
+      display: grid;
+      grid-template-columns: var(--time-col-w) repeat(5, minmax(var(--day-min-w), 1fr));
+      gap: 1px;
+      min-width: calc(var(--time-col-w) + 5 * var(--day-min-w));
+    }
+
+    .time-header,
+    .day-header {
+      background: #fff;
+      padding: 12px 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .day-header {
+      color: #fff;
+    }
+
+    .day-header[data-day="1"] { background: linear-gradient(135deg, #5a9fe0, #4a90d9); }
+    .day-header[data-day="2"] { background: linear-gradient(135deg, #b06cc6, #9b59b6); }
+    .day-header[data-day="3"] { background: linear-gradient(135deg, #3dc478, #27ae60); }
+    .day-header[data-day="4"] { background: linear-gradient(135deg, #f09540, #e67e22); }
+    .day-header[data-day="5"] { background: linear-gradient(135deg, #f05a9f, #e84393); }
+
+    .time-header {
+      color: #999;
+      font-weight: 600;
+    }
+
+    .time-label {
+      background: rgba(255, 255, 255, 0.7);
+      padding: 8px;
+      font-size: 0.75rem;
+      color: #aaa;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      min-height: var(--slot-h);
+    }
+
+    .grid-cell {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 6px;
+      min-height: var(--slot-h);
+    }
+
+    .day-column {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .day-column[data-day="1"] { background: rgba(74, 144, 217, 0.06); }
+    .day-column[data-day="2"] { background: rgba(155, 89, 182, 0.06); }
+    .day-column[data-day="3"] { background: rgba(39, 174, 96, 0.06); }
+    .day-column[data-day="4"] { background: rgba(230, 126, 34, 0.06); }
+    .day-column[data-day="5"] { background: rgba(232, 67, 147, 0.06); }
+
+    .class-block {
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      border-left: 4px solid var(--color, #ccc);
+    }
+
+    .class-block:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .class-block .time {
+      font-size: 0.7rem;
+      color: #aaa;
+      font-weight: 600;
+    }
+
+    .class-block .subject {
+      font-weight: 700;
+      font-size: 0.88rem;
+      line-height: 1.2;
+      color: #2d3436;
+    }
+
+    .class-block .teacher {
+      font-size: 0.75rem;
+      color: #999;
+      font-weight: 600;
+    }
+
+    .class-block.compact .subject {
+      font-size: 0.78rem;
+    }
+
+    .now-indicator {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e74c3c;
+      border-radius: 1px;
+      box-shadow: 0 0 6px rgba(231, 76, 60, 0.5);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ── Cards View ── */
+    .cards-view {
+      display: none;
+    }
+
+    body.view-active.cards .cards-view { display: block; }
+    body.view-active.cards .grid-view { display: none; }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .class-card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .class-card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .class-card .color-bar {
+      height: 5px;
+      border-radius: 0;
+    }
+
+    .class-card-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .class-card-time {
+      font-size: 0.78rem;
+      color: #aaa;
+      font-weight: 600;
+    }
+
+    .class-card-subject {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #2d3436;
+    }
+
+    .class-card-teacher {
+      font-size: 0.82rem;
+      color: #999;
+      font-weight: 600;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-top: 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .legend-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 18px 24px;
+      font-size: 0.78rem;
+      color: #ccc;
+      background: rgba(255, 255, 255, 0.4);
+      font-weight: 600;
+    }
+
+    /* ── Utilities ── */
+    .hidden { display: none !important; }
+    .dimmed { opacity: 0.25; }
+
+    /* ── Dark theme overrides ── */
+    body[data-theme="dark"] {
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 30%, #1a1a2e 60%, #0f0f23 100%);
+      color: #e0e0e0;
+    }
+
+    body[data-theme="dark"] .header {
+      background: linear-gradient(135deg, #2d1545, #1a2550);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body[data-theme="dark"] .day-tab {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    body[data-theme="dark"] .day-tab.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    body[data-theme="dark"] .view-toggle {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    body[data-theme="dark"] .view-btn { color: rgba(255, 255, 255, 0.5); }
+    body[data-theme="dark"] .view-btn.active { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+    body[data-theme="dark"] .search-box {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    body[data-theme="dark"] .search-box input { color: #eee; }
+    body[data-theme="dark"] .search-box input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+    body[data-theme="dark"] .ics-download {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    body[data-theme="dark"] .theme-toggle {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    body[data-theme="dark"] .time-header,
+    body[data-theme="dark"] .day-header {
+      background: #1e1e30;
+      color: #eee;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    body[data-theme="dark"] .day-header[data-day="1"] { background: linear-gradient(135deg, #3a6faa, #2d5a8a); }
+    body[data-theme="dark"] .day-header[data-day="2"] { background: linear-gradient(135deg, #7a3c92, #5e2d75); }
+    body[data-theme="dark"] .day-header[data-day="3"] { background: linear-gradient(135deg, #1e8a50, #167040); }
+    body[data-theme="dark"] .day-header[data-day="4"] { background: linear-gradient(135deg, #b86520, #955018); }
+    body[data-theme="dark"] .day-header[data-day="5"] { background: linear-gradient(135deg, #b83570, #902858); }
+
+    body[data-theme="dark"] .time-header { color: #555; }
+    body[data-theme="dark"] .time-label { background: rgba(255, 255, 255, 0.04); color: #666; }
+    body[data-theme="dark"] .grid-cell { background: rgba(255, 255, 255, 0.03); }
+
+    body[data-theme="dark"] .day-column[data-day="1"] { background: rgba(74, 144, 217, 0.04); }
+    body[data-theme="dark"] .day-column[data-day="2"] { background: rgba(155, 89, 182, 0.04); }
+    body[data-theme="dark"] .day-column[data-day="3"] { background: rgba(39, 174, 96, 0.04); }
+    body[data-theme="dark"] .day-column[data-day="4"] { background: rgba(230, 126, 34, 0.04); }
+    body[data-theme="dark"] .day-column[data-day="5"] { background: rgba(232, 67, 147, 0.04); }
+
+    body[data-theme="dark"] .class-block {
+      background: #1e1e30;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    body[data-theme="dark"] .class-block .time { color: #666; }
+    body[data-theme="dark"] .class-block .subject { color: #eee; }
+    body[data-theme="dark"] .class-block .teacher { color: #777; }
+
+    body[data-theme="dark"] .class-card {
+      background: #1e1e30;
+      border-color: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    body[data-theme="dark"] .class-card-subject { color: #eee; }
+    body[data-theme="dark"] .class-card-time { color: #666; }
+    body[data-theme="dark"] .class-card-teacher { color: #777; }
+
+    body[data-theme="dark"] .legend {
+      background: #1e1e30;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    body[data-theme="dark"] .legend-title { color: #666; }
+    body[data-theme="dark"] .legend-item { color: #aaa; }
+
+    body[data-theme="dark"] .footer {
+      background: rgba(0, 0, 0, 0.2);
+      color: #555;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+    body[data-theme="dark"] ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+    body[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+    body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+  </style>
+</head>
+<body class="view-active grid" data-theme="light">
+  <header class="header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Veronikas Schema
+    </div>
+    <div class="header-controls">
+      <div class="day-tabs">
+        <button class="day-tab active" data-day="all">Alla</button>
+        <button class="day-tab" data-day="1">Mån</button>
+        <button class="day-tab" data-day="2">Tis</button>
+        <button class="day-tab" data-day="3">Ons</button>
+        <button class="day-tab" data-day="4">Tor</button>
+        <button class="day-tab" data-day="5">Fre</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Schema
+        </button>
+        <button class="view-btn" data-view="cards">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/></svg>
+          Kort
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" type="text" placeholder="Sök lektion..." />
+      </div>
+      <a class="ics-download" href="schedule.ics" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        .ics
+      </a>
+      <button class="theme-toggle" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="grid-view">
+      <div class="timetable-wrapper">
+        <div class="timetable"></div>
+      </div>
+    </div>
+    <div class="cards-view">
+      <div class="cards-container"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Ämnen</div>
+      <div class="legend-grid"></div>
+    </div>
+  </main>
+  <footer class="footer">Veronikas schema — vecka 36 till 24</footer>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

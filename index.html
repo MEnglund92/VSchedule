@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Veronikas veckoschema - interaktivt schema med grid- och kalkyläge">
+  <title>Veronikas Veckoschema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#2c3e8c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VSchedule">
+</head>
+<body class="view-active grid" data-theme="light">
+  <header class="header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Veronikas Schema
+    </div>
+    <div class="header-controls">
+      <div class="day-tabs">
+        <button class="day-tab active" data-day="all" aria-pressed="true">Alla</button>
+        <button class="day-tab" data-day="1" aria-pressed="false">Mån</button>
+        <button class="day-tab" data-day="2" aria-pressed="false">Tis</button>
+        <button class="day-tab" data-day="3" aria-pressed="false">Ons</button>
+        <button class="day-tab" data-day="4" aria-pressed="false">Tor</button>
+        <button class="day-tab" data-day="5" aria-pressed="false">Fre</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Schema
+        </button>
+        <button class="view-btn" data-view="cards" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/></svg>
+          Kort
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" type="text" placeholder="Sök lektion..." />
+      </div>
+      <a class="ics-download" href="schedule.ics" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        .ics
+      </a>
+      <button class="theme-toggle" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="theme-toggle notif-bell" id="notif-bell" aria-pressed="false" title="Aktivera notiser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <select class="notif-lead" id="notif-lead" title="Påminnelse innan lektion">
+        <option value="5">5 min före</option>
+        <option value="10" selected>10 min före</option>
+        <option value="15">15 min före</option>
+        <option value="20">20 min före</option>
+        <option value="30">30 min före</option>
+      </select>
+      <button class="theme-toggle install-btn" id="install-btn" style="display:none;" title="Installera appen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="main">
+    <div id="next-lesson-banner" class="next-lesson-banner" style="display:none;"></div>
+    <div class="grid-view">
+      <div class="timetable-wrapper">
+        <div class="timetable"></div>
+      </div>
+    </div>
+    <div class="cards-view">
+      <div class="cards-container"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Ämnen</div>
+      <div class="legend-grid"></div>
+    </div>
+  </main>
+  <footer class="footer">Veronikas schema — vecka 36 till 24</footer>
+  <div id="notification-toast" class="notification-toast"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="notifications.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+
+    (function () {
+      let deferredPrompt = null;
+      const installBtn = document.getElementById('install-btn');
+      if (!installBtn) return;
+
+      window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredPrompt = event;
+        installBtn.style.display = '';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+          showIosInstallHint();
+          return;
+        }
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+        console.log('Install outcome:', outcome);
+      });
+
+      function showIosInstallHint() {
+        const toast = document.getElementById('notification-toast');
+        if (toast) {
+          toast.textContent = 'Tips: tryck Dela-knappen (kvadrat med pil upp) → "Lägg till på hemskärmen" för att installera VSchedule på iPhone.';
+          toast.classList.add('show');
+          clearTimeout(showIosInstallHint._t);
+          showIosInstallHint._t = setTimeout(() => toast.classList.remove('show'), 6000);
+        }
+      }
+
+      window.addEventListener('appinstalled', () => {
+        installBtn.style.display = 'none';
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veronikas Schema — Cyberpunk</title>
+  <style>
+    :root {
+      --slot-h: 60px;
+      --time-col-w: 100px;
+      --day-min-w: 220px;
+      --bg: #0d0d0d;
+      --bg-card: rgba(15,15,15,0.9);
+      --cyan: #00e5ff;
+      --magenta: #ff00aa;
+      --yellow: #ffe600;
+      --green: #39ff14;
+      --red: #ff2244;
+      --dim: #333;
+      --text: #d0d0d0;
+      --text-dim: #556;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Courier New', 'Consolas', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.15) 2px,
+        rgba(0,0,0,0.15) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .hidden { display: none !important; }
+    .dimmed { opacity: 0.25; }
+
+    .header {
+      background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+      border-bottom: 1px solid var(--cyan);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 20px rgba(0,229,255,0.1);
+    }
+
+    .header-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--cyan);
+      text-shadow: 0 0 10px rgba(0,229,255,0.5);
+    }
+
+    .header-title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 1px;
+    }
+
+    .day-tab {
+      background: rgba(0,229,255,0.05);
+      color: var(--text-dim);
+      border: 1px solid var(--dim);
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .day-tab:first-child { border-radius: 3px 0 0 3px; }
+    .day-tab:last-child { border-radius: 0 3px 3px 0; }
+
+    .day-tab:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      text-shadow: 0 0 8px rgba(0,229,255,0.4);
+    }
+
+    .day-tab.active {
+      background: rgba(0,229,255,0.15);
+      color: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.2), inset 0 0 10px rgba(0,229,255,0.05);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 1px;
+    }
+
+    .view-btn {
+      background: rgba(255,0,170,0.05);
+      color: var(--text-dim);
+      border: 1px solid var(--dim);
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .view-btn:first-child { border-radius: 3px 0 0 3px; }
+    .view-btn:last-child { border-radius: 0 3px 3px 0; }
+
+    .view-btn svg { width: 14px; height: 14px; }
+
+    .view-btn:hover {
+      border-color: var(--magenta);
+      color: var(--magenta);
+      text-shadow: 0 0 8px rgba(255,0,170,0.4);
+    }
+
+    .view-btn.active {
+      background: rgba(255,0,170,0.15);
+      color: var(--magenta);
+      border-color: var(--magenta);
+      box-shadow: 0 0 10px rgba(255,0,170,0.2), inset 0 0 10px rgba(255,0,170,0.05);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--dim);
+      border-radius: 3px;
+      padding: 5px 12px;
+    }
+
+    .search-box svg { width: 14px; height: 14px; opacity: 0.5; }
+
+    .search-box input {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-family: inherit;
+      font-size: 0.8rem;
+      outline: none;
+      width: 140px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .search-box input::placeholder { color: var(--text-dim); text-transform: lowercase; }
+
+    .search-box:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.15);
+    }
+
+    .ics-download {
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 3px;
+      padding: 6px 12px;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .ics-download svg { width: 14px; height: 14px; }
+
+    .ics-download:hover {
+      background: rgba(57,255,20,0.1);
+      box-shadow: 0 0 12px rgba(57,255,20,0.2);
+    }
+
+    .theme-toggle {
+      background: rgba(255,230,0,0.05);
+      color: var(--yellow);
+      border: 1px solid var(--yellow);
+      border-radius: 3px;
+      padding: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle svg { width: 16px; height: 16px; }
+
+    .theme-toggle:hover {
+      background: rgba(255,230,0,0.15);
+      box-shadow: 0 0 12px rgba(255,230,0,0.2);
+    }
+
+    .main {
+      padding: 20px 24px;
+    }
+
+    .timetable-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--dim);
+      background: rgba(0,0,0,0.5);
+    }
+
+    .timetable {
+      display: grid;
+      grid-template-columns: var(--time-col-w) repeat(5, minmax(var(--day-min-w), 1fr));
+      position: relative;
+      min-width: fit-content;
+    }
+
+    .time-header {
+      background: #111;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid var(--dim);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--cyan);
+    }
+
+    .day-header {
+      background: rgba(0,0,0,0.8);
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 2px solid var(--cyan);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text);
+    }
+
+    .time-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      padding: 8px;
+      text-align: center;
+      border-right: 1px solid var(--dim);
+      border-bottom: 1px solid rgba(50,50,50,0.5);
+      color: #448;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .grid-cell {
+      border-bottom: 1px solid rgba(50,50,50,0.5);
+      border-right: 1px solid rgba(50,50,50,0.5);
+      background: rgba(10,10,10,0.5);
+      min-height: var(--slot-h);
+      transition: background 0.3s;
+    }
+
+    .grid-cell:hover {
+      background: rgba(0,229,255,0.03);
+    }
+
+    .day-column {
+      position: relative;
+    }
+
+    .class-block {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      border-radius: 2px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      overflow: hidden;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(15,15,15,0.92);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 8px rgba(0,229,255,0.15), inset 0 0 8px rgba(0,229,255,0.03);
+    }
+
+    .class-block:hover {
+      box-shadow: 0 0 16px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.06);
+      transform: scale(1.02);
+      z-index: 10;
+    }
+
+    .class-block:nth-child(3n+2) { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,170,0.15), inset 0 0 8px rgba(255,0,170,0.03); }
+    .class-block:nth-child(3n+2):hover { box-shadow: 0 0 16px rgba(255,0,170,0.3), inset 0 0 12px rgba(255,0,170,0.06); }
+    .class-block:nth-child(3n) { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.15), inset 0 0 8px rgba(255,230,0,0.03); }
+    .class-block:nth-child(3n):hover { box-shadow: 0 0 16px rgba(255,230,0,0.3), inset 0 0 12px rgba(255,230,0,0.06); }
+
+    .class-block.compact .time,
+    .class-block.compact .teacher { display: none; }
+
+    .class-block .time {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .class-block .subject {
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .class-block .teacher {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .now-indicator {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--magenta);
+      z-index: 20;
+      pointer-events: none;
+      box-shadow: 0 0 8px var(--magenta), 0 0 20px rgba(255,0,170,0.3);
+    }
+
+    .now-indicator::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      background: var(--magenta);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--magenta);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--magenta); }
+      50% { opacity: 0.5; box-shadow: 0 0 16px var(--magenta); }
+    }
+
+    @keyframes flicker {
+      0%, 92%, 100% { opacity: 1; }
+      93% { opacity: 0.8; }
+      94% { opacity: 1; }
+      96% { opacity: 0.7; }
+      97% { opacity: 1; }
+    }
+
+    .class-block:hover {
+      animation: flicker 4s infinite;
+    }
+
+    .cards-view { display: none; }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .class-card {
+      background: var(--bg-card);
+      border: 1px solid var(--cyan);
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 0 8px rgba(0,229,255,0.1);
+      transition: all 0.2s;
+    }
+
+    .class-card:hover {
+      box-shadow: 0 0 16px rgba(0,229,255,0.25);
+      border-color: var(--magenta);
+    }
+
+    .class-card.color-bar {
+      border-left: 4px solid currentColor;
+    }
+
+    .class-card-content { padding: 14px; }
+
+    .class-card-time {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+    }
+
+    .class-card-subject {
+      font-size: 1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .class-card-teacher {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .legend {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--dim);
+    }
+
+    .legend-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      color: var(--cyan);
+    }
+
+    .legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+      border: 1px solid rgba(0,229,255,0.3);
+      box-shadow: 0 0 6px rgba(0,229,255,0.15);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--dim);
+      margin-top: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .header { flex-direction: column; align-items: flex-start; }
+      .header-controls { width: 100%; justify-content: flex-start; }
+      .main { padding: 12px; }
+    }
+  </style>
+</head>
+<body class="view-active grid" data-theme="light">
+  <header class="header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Veronikas Schema
+    </div>
+    <div class="header-controls">
+      <div class="day-tabs">
+        <button class="day-tab active" data-day="all">Alla</button>
+        <button class="day-tab" data-day="1">Mån</button>
+        <button class="day-tab" data-day="2">Tis</button>
+        <button class="day-tab" data-day="3">Ons</button>
+        <button class="day-tab" data-day="4">Tor</button>
+        <button class="day-tab" data-day="5">Fre</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Schema
+        </button>
+        <button class="view-btn" data-view="cards">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/></svg>
+          Kort
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" type="text" placeholder="Sök lektion..." />
+      </div>
+      <a class="ics-download" href="schedule.ics" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        .ics
+      </a>
+      <button class="theme-toggle" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="grid-view">
+      <div class="timetable-wrapper">
+        <div class="timetable"></div>
+      </div>
+    </div>
+    <div class="cards-view">
+      <div class="cards-container"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Ämnen</div>
+      <div class="legend-grid"></div>
+    </div>
+  </main>
+  <footer class="footer">Veronikas schema — vecka 36 till 24</footer>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

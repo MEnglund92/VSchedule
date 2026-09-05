@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veronikas Schema — Minimal Japanese</title>
+  <style>
+    :root {
+      --slot-h: 60px;
+      --time-col-w: 100px;
+      --day-min-w: 220px;
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #999999;
+      --text-light: #bbbbbb;
+      --dusty-rose: #d4a0a0;
+      --sage: #a8bfa0;
+      --lavender: #b0a8c8;
+      --pale-gold: #d4c8a0;
+      --soft-blue: #a0b8c8;
+      --peach: #d4b8a0;
+      --mint: #a0c8b8;
+      --mauve: #c0a0b8;
+      --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      letter-spacing: 0.01em;
+    }
+
+    body.dark {
+      --bg: #1a1a1a;
+      --surface: #242424;
+      --border: #333333;
+      --text: #e0e0e0;
+      --text-muted: #777777;
+      --text-light: #555555;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    .header-title svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 0;
+    }
+
+    .day-tab {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      font-family: var(--font);
+      letter-spacing: 0.04em;
+      transition: all 0.2s ease;
+    }
+
+    .day-tab:first-child { border-radius: 0; }
+    .day-tab + .day-tab { border-left: none; }
+
+    .day-tab.active {
+      background: var(--text);
+      color: var(--surface);
+      border-color: var(--text);
+    }
+
+    .day-tab:hover:not(.active) {
+      background: var(--border);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0;
+    }
+
+    .view-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn + .view-btn { border-left: none; }
+
+    .view-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .view-btn.active {
+      background: var(--text);
+      color: var(--surface);
+      border-color: var(--text);
+    }
+
+    .view-btn:hover:not(.active) {
+      background: var(--border);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--text-muted);
+    }
+
+    .search-box svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      border: none;
+      background: none;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--text);
+      outline: none;
+      width: 140px;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-light);
+    }
+
+    .ics-download {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      transition: all 0.2s ease;
+    }
+
+    .ics-download svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ics-download:hover {
+      background: var(--border);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    .main {
+      flex: 1;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .grid-view { display: block; }
+    .cards-view { display: none; }
+
+    body.view-active .grid-view { display: block; }
+    body.view-active .cards-view { display: none; }
+
+    .timetable-wrapper {
+      overflow-x: auto;
+      padding-bottom: 16px;
+    }
+
+    .timetable {
+      display: grid;
+      grid-template-columns: var(--time-col-w) repeat(5, minmax(var(--day-min-w), 1fr));
+      min-width: calc(var(--time-col-w) + 5 * var(--day-min-w));
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .time-header,
+    .day-header {
+      padding: 12px 8px;
+      font-size: 12px;
+      font-weight: 400;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .time-header {
+      background: var(--surface);
+      color: var(--text-light);
+      border-right: 1px solid var(--border);
+    }
+
+    .day-header {
+      background: var(--surface);
+      color: var(--text-muted);
+      border-right: 1px solid var(--border);
+    }
+
+    .day-header:last-child {
+      border-right: none;
+    }
+
+    .time-label {
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--text-light);
+      text-align: right;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .grid-cell {
+      min-height: var(--slot-h);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+    }
+
+    .grid-cell:last-child {
+      border-right: none;
+    }
+
+    .day-column {
+      position: relative;
+    }
+
+    .class-block {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      padding: 6px 8px;
+      background: var(--surface);
+      border-left: 2px solid var(--dusty-rose);
+      font-size: 11px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      z-index: 1;
+    }
+
+    .class-block:hover {
+      background: #f5f5f5;
+    }
+
+    .class-block .time {
+      font-size: 10px;
+      color: var(--text-light);
+      font-weight: 300;
+      margin-bottom: 2px;
+    }
+
+    .class-block .subject {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 1px;
+    }
+
+    .class-block .teacher {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    .class-block.compact .subject,
+    .class-block.compact .teacher {
+      font-size: 10px;
+    }
+
+    .now-indicator {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--dusty-rose);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .now-indicator::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: -3px;
+      width: 7px;
+      height: 7px;
+      background: var(--dusty-rose);
+      border-radius: 50%;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .class-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      transition: background 0.15s ease;
+    }
+
+    .class-card:hover {
+      background: #f7f7f7;
+    }
+
+    .class-card.color-bar {
+      border-left: 3px solid var(--dusty-rose);
+    }
+
+    .class-card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .class-card-time {
+      font-size: 11px;
+      color: var(--text-light);
+      font-weight: 300;
+    }
+
+    .class-card-subject {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .class-card-teacher {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    .legend {
+      padding: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .legend-title {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--text-muted);
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .footer {
+      padding: 16px 32px;
+      font-size: 11px;
+      color: var(--text-light);
+      border-top: 1px solid var(--border);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+
+    .hidden { display: none !important; }
+    .dimmed { opacity: 0.25; }
+
+    @media (max-width: 768px) {
+      .header { padding: 12px 16px; }
+      .header-controls { gap: 12px; }
+      .main { padding: 16px; }
+      .search-box input { width: 100px; }
+    }
+  </style>
+</head>
+<body class="view-active grid" data-theme="light">
+  <header class="header">
+    <div class="header-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Veronikas Schema
+    </div>
+    <div class="header-controls">
+      <div class="day-tabs">
+        <button class="day-tab active" data-day="all">Alla</button>
+        <button class="day-tab" data-day="1">Mån</button>
+        <button class="day-tab" data-day="2">Tis</button>
+        <button class="day-tab" data-day="3">Ons</button>
+        <button class="day-tab" data-day="4">Tor</button>
+        <button class="day-tab" data-day="5">Fre</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Schema
+        </button>
+        <button class="view-btn" data-view="cards">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/></svg>
+          Kort
+        </button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" type="text" placeholder="Sök lektion..." />
+      </div>
+      <a class="ics-download" href="schedule.ics" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        .ics
+      </a>
+      <button class="theme-toggle" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="grid-view">
+      <div class="timetable-wrapper">
+        <div class="timetable"></div>
+      </div>
+    </div>
+    <div class="cards-view">
+      <div class="cards-container"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Ämnen</div>
+      <div class="legend-grid"></div>
+    </div>
+  </main>
+  <footer class="footer">Veronikas schema — vecka 36 till 24</footer>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
