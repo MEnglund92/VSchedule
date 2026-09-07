@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "timezone": "Europe/Stockholm",
+  "weekdaysOn": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "lessons": [
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 545,
+      "end": 585,
+      "time": "09:05–09:45",
+      "subject": "Klassmöte",
+      "category": "class-meeting",
+      "teacher": "ELKJ / BEMA"
+    },
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 600,
+      "end": 670,
+      "time": "10:00–11:10",
+      "subject": "Geografi / Historia / Samhälle / Religion",
+      "category": "geo-hist",
+      "teacher": "ELKJ"
+    },
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 710,
+      "end": 765,
+      "time": "11:50–12:45",
+      "subject": "Svenska",
+      "category": "swedish",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 765,
+      "end": 815,
+      "time": "12:45–13:35",
+      "subject": "Matematik",
+      "category": "maths",
+      "teacher": "PETE"
+    },
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 815,
+      "end": 870,
+      "time": "13:35–14:30",
+      "subject": "Biologi / Kemi / Fysik",
+      "category": "science",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 1,
+      "dayName": "Måndag",
+      "start": 975,
+      "end": 1050,
+      "time": "16:15–17:30",
+      "subject": "Bild och form",
+      "category": "art",
+      "teacher": "GERY"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 520,
+      "end": 585,
+      "time": "08:40–09:45",
+      "subject": "Svenska",
+      "category": "swedish",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 585,
+      "end": 645,
+      "time": "09:45–10:45",
+      "subject": "Engelska",
+      "category": "english",
+      "teacher": "STNO"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 695,
+      "end": 755,
+      "time": "11:35–12:35",
+      "subject": "Musik",
+      "category": "music",
+      "teacher": "PETE / DAHA"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 770,
+      "end": 830,
+      "time": "12:50–13:50",
+      "subject": "Matematik",
+      "category": "maths",
+      "teacher": "PETE"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 830,
+      "end": 835,
+      "time": "13:50–13:55",
+      "subject": "SVA",
+      "category": "sva",
+      "teacher": "KALI"
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 870,
+      "end": 890,
+      "time": "14:30–14:50",
+      "subject": "Elgitarr",
+      "category": "instrument",
+      "teacher": ""
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 900,
+      "end": 920,
+      "time": "15:00–15:20",
+      "subject": "Kontrabas",
+      "category": "instrument",
+      "teacher": ""
+    },
+    {
+      "day": 2,
+      "dayName": "Tisdag",
+      "start": 940,
+      "end": 1020,
+      "time": "15:40–17:00",
+      "subject": "Percussion",
+      "category": "instrument",
+      "teacher": ""
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 480,
+      "end": 530,
+      "time": "08:00–08:50",
+      "subject": "Biologi / Kemi / Fysik",
+      "category": "science",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 545,
+      "end": 605,
+      "time": "09:05–10:05",
+      "subject": "Geografi / Historia / Samhälle / Religion",
+      "category": "geo-hist",
+      "teacher": "ELKJ"
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 605,
+      "end": 665,
+      "time": "10:05–11:05",
+      "subject": "Matematik",
+      "category": "maths",
+      "teacher": "PETE"
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 705,
+      "end": 770,
+      "time": "11:45–12:50",
+      "subject": "Idrott och hälsa",
+      "category": "pe",
+      "teacher": "ALPA"
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 785,
+      "end": 850,
+      "time": "13:05–14:10",
+      "subject": "SVA / Laboration",
+      "category": "sva",
+      "teacher": "KALI"
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 900,
+      "end": 930,
+      "time": "15:00–15:30",
+      "subject": "Piano",
+      "category": "instrument",
+      "teacher": ""
+    },
+    {
+      "day": 3,
+      "dayName": "Onsdag",
+      "start": 945,
+      "end": 1020,
+      "time": "15:45–17:00",
+      "subject": "Film",
+      "category": "art",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 480,
+      "end": 530,
+      "time": "08:00–08:50",
+      "subject": "Engelska",
+      "category": "english",
+      "teacher": "STNO"
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 530,
+      "end": 590,
+      "time": "08:50–09:50",
+      "subject": "Bild",
+      "category": "art",
+      "teacher": "GERY"
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 590,
+      "end": 635,
+      "time": "09:50–10:35",
+      "subject": "Idrott och hälsa",
+      "category": "pe",
+      "teacher": "ALPA"
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 665,
+      "end": 700,
+      "time": "11:05–11:40",
+      "subject": "Gångvakt",
+      "category": "duty",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 700,
+      "end": 770,
+      "time": "11:40–12:50",
+      "subject": "Slöjd / Textilt",
+      "category": "craft",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 770,
+      "end": 785,
+      "time": "12:50–13:05",
+      "subject": "Studievakt",
+      "category": "duty",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 785,
+      "end": 845,
+      "time": "13:05–14:05",
+      "subject": "SVA / Laboration",
+      "category": "sva",
+      "teacher": "KALI"
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 845,
+      "end": 875,
+      "time": "14:05–14:35",
+      "subject": "Hemkunskap",
+      "category": "home-ec",
+      "teacher": "JAYA"
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 945,
+      "end": 1005,
+      "time": "15:45–16:45",
+      "subject": "Street dance",
+      "category": "dance",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 1005,
+      "end": 1020,
+      "time": "16:45–17:00",
+      "subject": "Flute",
+      "category": "instrument",
+      "teacher": ""
+    },
+    {
+      "day": 4,
+      "dayName": "Torsdag",
+      "start": 1080,
+      "end": 1120,
+      "time": "18:00–18:40",
+      "subject": "Blåsorkester",
+      "category": "ensemble",
+      "teacher": ""
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 485,
+      "end": 545,
+      "time": "08:05–09:05",
+      "subject": "Matematik",
+      "category": "maths",
+      "teacher": "PETE"
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 545,
+      "end": 615,
+      "time": "09:05–10:15",
+      "subject": "Engelska",
+      "category": "english",
+      "teacher": "STNO"
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 635,
+      "end": 690,
+      "time": "10:35–11:30",
+      "subject": "SVA",
+      "category": "sva",
+      "teacher": "KALI"
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 710,
+      "end": 730,
+      "time": "11:50–12:10",
+      "subject": "Svenska",
+      "category": "swedish",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 730,
+      "end": 790,
+      "time": "12:10–13:10",
+      "subject": "Teknik",
+      "category": "tech",
+      "teacher": "BEMA"
+    },
+    {
+      "day": 5,
+      "dayName": "Fredag",
+      "start": 790,
+      "end": 855,
+      "time": "13:10–14:15",
+      "subject": "Geografi / Historia / Samhälle / Religion",
+      "category": "geo-hist",
+      "teacher": "ELKJ"
+    }
+  ]
+}

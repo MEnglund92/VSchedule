@@ -1,0 +1,22 @@
+name = "vschedule-push"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID_1"
+
+[[kv_namespaces]]
+binding = "DEDUPE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID_2"
+
+[[kv_namespaces]]
+binding = "SCHEDULE_CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID_3"
+
+# Secrets (set via `wrangler secret put`, never commit):
+# VAPID_PUBLIC_KEY
+# VAPID_PRIVATE_KEY
