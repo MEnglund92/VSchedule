@@ -13,10 +13,9 @@
   // ------------------------------------------------------------------
   // PUSH CONFIG
   // ------------------------------------------------------------------
-  // TODO Phase 3: set WORKER_URL to your deployed Cloudflare worker
-  // (e.g. https://vschedule-push.<subdomain>.workers.dev) and make sure it
-  // matches the VAPID keypair stored there.
-  const WORKER_URL = '';
+  // Cloudflare worker that sends the push. Must match the VAPID keypair
+  // stored as secrets there (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY).
+  const WORKER_URL = 'https://vschedule-push.mattias-englund1992.workers.dev';
   const VAPID_PUBLIC_KEY = 'BL2-LRSrUgrMjJD65SRDgurPf5zpdFjJIQ1Yy2gOOGVlBfZFwJ_ldPw4FEuWtno7PI0Txnll9AflsjVZeRsqlSQ';
 
   const state = {
