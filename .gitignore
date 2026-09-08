@@ -10,6 +10,7 @@ wrangler-tunnel.lock
 *.secret
 .env
 .dev.vars
+cloudflare/.vapid-keys
 
 # OS
 .DS_Store

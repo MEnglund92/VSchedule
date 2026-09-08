@@ -1,16 +1,30 @@
-// Next-lesson notifications: in-page banner + browser/OS pop-up notifications.
-// The schedule is weekly-recurring (same lessons every week), so we compute
-// today's lessons from scheduleData. This logic is built to be PWA-friendly:
-// the same data/shape can be reused by a service worker for background push
-// when this is wrapped into a mobile/web app later.
+// VSchedule notifications:
+//  1) In-page "next lesson" banner (always works).
+//  2) Browser/OS pop-up notifications (Web Notifications API, page open).
+//  3) Background push (Phase 2+) — pushManager.subscribe + Cloudflare worker.
+//     True closed-app notifications once the worker is deployed (Phase 3).
+//
+// The bell button toggles: enable = permission + push subscribe + worker
+// registration; disable = unsubscribe locally and at the worker.
 
 (function () {
   'use strict';
 
+  // ------------------------------------------------------------------
+  // PUSH CONFIG
+  // ------------------------------------------------------------------
+  // TODO Phase 3: set WORKER_URL to your deployed Cloudflare worker
+  // (e.g. https://vschedule-push.<subdomain>.workers.dev) and make sure it
+  // matches the VAPID keypair stored there.
+  const WORKER_URL = '';
+  const VAPID_PUBLIC_KEY = 'BL2-LRSrUgrMjJD65SRDgurPf5zpdFjJIQ1Yy2gOOGVlBfZFwJ_ldPw4FEuWtno7PI0Txnll9AflsjVZeRsqlSQ';
+
   const state = {
     permission: Notification && 'permission' in Notification ? Notification.permission : 'unsupported',
     leadMin: 10,
-    notified: new Set() // keys like "1-13:55" (day-startMin) to avoid duplicates
+    notified: new Set(), // local dedupe: "day-startMin"
+    pushSub: null,       // PushSubscription | null
+    pushActive: false    // true once subscribed + registered with worker
   };
 
   let els = {};
@@ -20,6 +34,16 @@
     els.leadSelect = document.getElementById('notif-lead');
     els.banner = document.getElementById('next-lesson-banner');
     els.toast = document.getElementById('notification-toast');
+  }
+
+  // ---------- helpers ----------
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const output = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
+    return output;
   }
 
   // JS getDay(): Sunday=0, Monday=1 ... Saturday=6.
@@ -52,6 +76,7 @@
     return lessons.some(l => l.endMin > nowMin);
   }
 
+  // ---------- banner ----------
   function updateBanner() {
     if (!els.banner) return;
     const now = new Date();
@@ -78,7 +103,9 @@
     els.banner.style.display = 'flex';
   }
 
+  // Local in-page pop-ups. Disabled when background push is active to avoid duplicates.
   function checkAndNotify() {
+    if (state.pushActive) return;
     if (state.permission !== 'granted') return;
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -89,66 +116,150 @@
       const key = `${l.day}-${l.startMin}`;
       if (fireWindow && !state.notified.has(key)) {
         state.notified.add(key);
-        const minutesRemaining = l.startMin - nowMin;
-        const body = `${l.subject} börjar kl. ${formatTime(l.startMin)}${l.teacher ? ' med ' + l.teacher : ''} (om ${minutesRemaining} min)`;
+        const body = `${l.subject} börjar kl. ${formatTime(l.startMin)}${l.teacher ? ' med ' + l.teacher : ''} (om ${l.startMin - nowMin} min)`;
         try {
-          new Notification(`${l.subject} börjar snart`, {
-            body,
-            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>'
-          });
-        } catch (e) {
-          // Notification constructor failed (e.g. some mobile browsers) - ignore.
-        }
+          new Notification(`${l.subject} börjar snart`, { body });
+        } catch (e) { /* ignore */ }
       }
     });
   }
 
-  function showToast(message, isError) {
+  // ---------- toast + bell state ----------
+  function showToast(message, isError, duration) {
     if (!els.toast) return;
     els.toast.textContent = message;
     els.toast.classList.toggle('toast-error', !!isError);
     els.toast.classList.add('show');
     clearTimeout(showToast._timer);
-    showToast._timer = setTimeout(() => els.toast.classList.remove('show'), 4000);
+    showToast._timer = setTimeout(() => els.toast.classList.remove('show'), duration || 4000);
   }
 
   function updateBellState() {
     if (!els.bellBtn) return;
-    const granted = state.permission === 'granted';
-    els.bellBtn.classList.toggle('active', granted);
-    els.bellBtn.setAttribute('aria-pressed', granted);
+    const active = state.pushActive || (state.permission === 'granted' && !('serviceWorker' in navigator));
+    els.bellBtn.classList.toggle('active', active);
+    els.bellBtn.setAttribute('aria-pressed', active);
   }
 
-  async function requestNotificationPermission() {
-    if (!('Notification' in window)) {
-      showToast('Den här webbläsaren stöder inte notiser.', true);
-      return;
+  // ---------- push (Phase 2) ----------
+  async function getPushSubscription() {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return existing;
+    return reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+  }
+
+  async function registerWithWorker(subscription) {
+    if (!WORKER_URL) {
+      showToast('Prenumeration klar. Välj minuter och vänta på push (worker deployas i fas 3).');
+      state.pushActive = true;
+      updateBellState();
+      return; // worker not deployed yet — keep subscription locally
     }
-    if (state.permission === 'denied') {
-      showToast('Notiser är avstängda i webbläsarens inställningar.', true);
+    const res = await fetch(`${WORKER_URL}/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: subscription.endpoint,
+        keys: subscription.toJSON ? subscription.toJSON().keys : subscription.keys,
+        leadMin: state.leadMin
+      })
+    });
+    if (!res.ok) throw new Error('register failed ' + res.status);
+  }
+
+  async function syncLeadToWorker() {
+    if (!state.pushActive || !state.pushSub) return;
+    if (!WORKER_URL) return;
+    try {
+      await fetch(`${WORKER_URL}/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: state.pushSub.endpoint,
+          keys: state.pushSub.toJSON ? state.pushSub.toJSON().keys : state.pushSub.keys,
+          leadMin: state.leadMin
+        })
+      });
+    } catch (e) { /* silent */ }
+  }
+
+  async function enablePush() {
+    if (!('serviceWorker' in navigator)) {
+      showToast('Den här webbläsaren stödjer inte bakgrundsnotiser.', true);
       return;
     }
     try {
-      state.permission = await Notification.requestPermission();
-      updateBellState();
-      if (state.permission === 'granted') {
-        showToast('Notiser påslagna! Du får en påminnelse innan varje lektion.');
-      } else {
-        showToast('Notiser avstängda. Du kan fortfarande se nästa lektion längst upp.');
+      if (state.permission !== 'granted') {
+        state.permission = await Notification.requestPermission();
       }
+      if (state.permission !== 'granted') {
+        updateBellState();
+        showToast('Notiser avstängda. Du kan fortfarande se nästa lektion längst upp.', true);
+        return;
+      }
+      state.pushSub = await getPushSubscription();
+      await registerWithWorker(state.pushSub);
+      state.pushActive = true;
+      updateBellState();
+      showToast('Bakgrundsnotiser påslagna! Du får en påminnelse innan varje lektion.');
     } catch (e) {
-      showToast('Kunde inte begära tillstånd för notiser.', true);
+      state.pushActive = false;
+      updateBellState();
+      showToast('Kunde inte aktivera bakgrundsnotiser: ' + (e && e.message ? e.message : e), true);
     }
   }
 
+  async function disablePush() {
+    try {
+      if (state.pushSub) {
+        if (WORKER_URL) {
+          await fetch(`${WORKER_URL}/unsubscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: state.pushSub.endpoint })
+          }).catch(() => {});
+        }
+        await state.pushSub.unsubscribe();
+      }
+    } catch (e) { /* ignore */ }
+    state.pushSub = null;
+    state.pushActive = false;
+    updateBellState();
+    showToast('Notiser avstängda.');
+  }
+
+  // Restore subscription state on load.
+  async function restorePushState() {
+    if (!('serviceWorker' in navigator)) {
+      updateBellState();
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      state.pushSub = await reg.pushManager.getSubscription();
+      state.pushActive = !!state.pushSub;
+    } catch (e) { /* ignore */ }
+    updateBellState();
+    if (state.pushActive) await syncLeadToWorker();
+  }
+
+  // ---------- events ----------
   function bindEvents() {
     if (els.bellBtn) {
-      els.bellBtn.addEventListener('click', requestNotificationPermission);
+      els.bellBtn.addEventListener('click', () => {
+        if (state.pushActive) disablePush();
+        else enablePush();
+      });
     }
     if (els.leadSelect) {
       els.leadSelect.addEventListener('change', () => {
         state.leadMin = parseInt(els.leadSelect.value, 10) || 10;
         localStorage.setItem('notifLead', String(state.leadMin));
+        syncLeadToWorker();
       });
     }
     const savedLead = parseInt(localStorage.getItem('notifLead'), 10);
@@ -160,17 +271,21 @@
 
   function initNotifications() {
     initElements();
-    // Reset notified set weekly (simplest: clear once per day change).
     updateBanner();
     checkAndNotify();
     setInterval(updateBanner, 30000);
     setInterval(checkAndNotify, 30000);
     updateBellState();
     bindEvents();
+    restorePushState();
   }
 
-  // Expose for potential reuse (e.g. future service worker).
-  window.SchNotif = { getTodayLessons, getNextLesson };
+  // Expose for potential reuse (e.g. debugging).
+  window.SchNotif = {
+    getTodayLessons,
+    getNextLesson,
+    state
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNotifications);
