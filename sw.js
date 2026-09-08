@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vschedule-v1';
+const CACHE_NAME = 'vschedule-v2';
 const APP_SHELL = [
   './',
   './index.html',
