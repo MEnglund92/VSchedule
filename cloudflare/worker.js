@@ -8,6 +8,7 @@
 // Endpoints:
 //   POST /subscribe   { endpoint, keys: {p256dh, auth}, leadMin }
 //   POST /unsubscribe { endpoint }
+//   POST /send-test   (requires TEST_SECRET header) — immediate test push to all subs
 //   GET  /health
 // Cron: "scheduled" event defined in wrangler.toml
 //
@@ -15,6 +16,7 @@
 //   VAPID_PUBLIC_KEY   base64url of the 65-byte uncompressed EC public point (from gen-vapid.mjs)
 //   VAPID_PRIVATE_KEY  JSON JWK (with x,y,d) of the EC P-256 key (from gen-vapid.mjs)
 //   CONTACT_EMAIL      contact email for VAPID `sub`
+//   TEST_SECRET        random token guarding POST /send-test
 
 // ---------------------------------------------------------------------------
 // Base64URL + RFC 8291 push encryption + VAPID signing (WebCrypto only)
@@ -171,7 +173,7 @@ export default {
     const cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type, x-test-secret'
     };
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
 
@@ -201,6 +203,24 @@ export default {
       } catch (e) {
         return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 400, headers: { 'Content-Type': 'application/json', ...cors } });
       }
+    }
+
+    if (url.pathname === '/send-test' && request.method === 'POST') {
+      if (!env.TEST_SECRET || request.headers.get('x-test-secret') !== env.TEST_SECRET) {
+        return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...cors } });
+      }
+      const list = await env.SUBSCRIPTIONS.list();
+      const results = await Promise.allSettled(list.keys.map(async ({ value }) => {
+        let sub;
+        try { sub = JSON.parse(value); } catch { return 'bad'; }
+        return pushHandler(sub, {
+          title: 'VSchedule test 🔔',
+          body: 'Det här är ett test av bakgrundsnotiser. Om du ser det fungerar allt!',
+          url: './'
+        }, env).catch(() => 'error');
+      }));
+      const n = results.length;
+      return new Response(JSON.stringify({ ok: true, sent: n }), { headers: { 'Content-Type': 'application/json', ...cors } });
     }
 
     return new Response('Not found', { status: 404, headers: cors });
