@@ -98,7 +98,7 @@ async function pushHandler(sub, payloadObj, env) {
 // ---------------------------------------------------------------------------
 // Scheduling
 // ---------------------------------------------------------------------------
-const SCHEDULE_URL = 'https://YOUR_GH_USER.github.io/VSchedule/lesson-data.json'; // TODO: set real URL
+const SCHEDULE_URL = 'https://menglund92.github.io/VSchedule/lesson-data.json';
 
 async function fetchSchedule(env) {
   try {
